@@ -1,0 +1,34 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <script src="http://apps.bdimg.com/libs/jquery/1.11.1/jquery.js"></script> 
+    <script src="http://underscorejs.org/underscore-min.js"></script> @*jquery集合操作插件使用时加入 *@  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsviews/0.9.79/jsviews.min.js"></script> @* jsviews引擎模版*@
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>@ViewBag.Title</title>
+    <style>
+        body, input, select, button, h1 {
+            font-size: 28px;
+            line-height: 1.7;
+        }
+
+
+
+        .done   {
+            text-decoration: line-through;
+        }
+
+         /*拥有.done class的input中，给checkbox 类型以及button类型的添加css样式*/
+        /*.done input[type=checkbox], .done input[type=button] {
+            
+            display: none;
+        }*/
+    </style>
+</head>
+<body>
+
+    <div>
+        @RenderBody()
+    </div>
+</body>
+</html>

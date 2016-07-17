@@ -1,0 +1,115 @@
+﻿
+<input type="text" id="text" />
+<input id="addItem" type="button" value="添加事项" />
+<P>待办事项:<p />
+<div>
+    <ul id="list"></ul>
+</div>
+<input type="button" value="清空列表" id="removeAll" />
+<input type="button" value="删除" id="remove" />
+<input type="button" value="完成" id="done" />
+
+<script type="text/x-jsrender" id="itemTmpl">
+    @*jsviews插件提供的 语法方法如下 *@
+    {{if IsDone }} @* 如果isdone为true*@
+    <li class="done">
+        {{else}}
+    <li>
+        {{/if}}
+        {{>Title}}
+        {{if !IsDone }}
+        <input class="remove" type="checkbox" />
+        <input class="btnDelete" type="button" value="x">
+
+        <button class="btnEdit">编辑</button>
+        {{/if}}
+    </li>
+</script>
+
+
+<script>
+
+
+
+    $("#addItem").on("click", function () {
+        /*li中所有data的item对象的集合*/
+        var data = $("#list li").map(function () { return $(this).data("item"); }) // jquery中data方法是给目标添加相应的“属性名”：属性值 。无则创建，有则更新。
+        var $text = $("#text");                                                //data方法单独只有key 时表示读取该属性的属性值
+        var isVal = $text.val();//对表单项目的取值方法；
+        //console.log(isVal);
+        //console.log(null);
+        if (isVal) {//c#中直接可以对目标进行判断，若目标为空则返回false 若有值则为true ，｛详情请见真值表 ！！！｝
+
+            var $editli = $text.data("target");//此处target是后面加到属性上的，此处的属性绑定到Html元素上，所以没有未定义报错出现。
+            if ($editli) {//判断新增事项还是修改事项
+                var data = $editli.data("item");
+                data.Title = isVal;//  修改后的内容赋值；
+                var $linew = $($.templates("#itemTmpl").render(data)).data("item", data).insertBefore($editli); //插入同级元素前面
+                $editli.remove();
+                $text.data("target", null);//清空target 否则修改事项后target一直有值则无法新增事项
+            }
+            else
+                if (_.findIndex(data, { Title: isVal }) == -1) { /*underscore jquery插件中的方法，判断是否重复*/
+                    //var $li = $($("#itemTmpl").html()).appendTo("#list");//appendTo 只可用于 对象， 所以这里将模版引擎的文本内容用$包装成一个对象再使用 appendTo方法
+                    // $li.find("span").text(isVal);//text是将目标以纯文本的形式加入到目标标签中较为安全，若采用append等若内容中有标签项目则会在目标中产生作用，可能修改代码样式不建议使用。
+                    var item = {
+                        Title: isVal,
+                        IsDone: false
+                    }
+                    var $li = $($.templates("#itemTmpl").render(item)).prependTo("#list")//render 一
+                    $li.data("item", item);
+                    $("#text").val("").focus(); //实现添加完成后清空输入栏并且光标回到输入栏，focus方法用途。
+                }
+        }
+    })
+
+    $("#removeAll").on("click", function () {
+        /*var isunRemovavle = $(this).hasClass("unRemovavle");
+        if (isunRemovavle) return;*/
+        $("#list").empty();
+    })
+
+    $("#remove").on("click", function () {
+        $(":checked").closest("li").remove();
+    })
+    $("#list").on("click", ".btnDelete", function () { //此处直接为“.btnDelete”绑定事件无效，因为该类还为创建出来。采用on（“事件”，“触发位置”，function）的表示为“#list”添加一个事件，之后则一直监听list中是否有.btnDelete。一旦出现则绑定事件
+        $(this).closest("li").remove();
+    }).on("click", ".btnEdit", function () {
+        var $li = $(this).closest("li")   //此处的$(this)指代  #list中的.btnDelete
+        var data = $li.data("item");
+        $("#text").val(data.Title).data("target", $li);// val 与data都作用于text，此处为简写而已。
+    })// 为一个东西绑定on（XX）.on(xx)表示绑定这两个东西
+
+
+    $("#done").on("click", function () {
+        var $checked = $(":checked").closest("li");
+        $checked.each(function () {
+            var $thisLi = $(this);
+            var data = $thisLi.data("item"); //data（）方法每次只可以调用出集合里的第一个单个对象的数据 ，所以此处用each方法进行循环
+            data.IsDone = true;
+            $($.templates("#itemTmpl").render(data)).data("item", data).insertBefore($thisLi);
+            $thisLi.remove();
+
+        })
+        var $sli = $("#list li");
+        for (var i = 0; i < $sli.length; i++) {
+            for (var j = 0; j < $sli.length - i; j++) {
+                console.log($sli[j])
+                if ($( $sli[j]).data("item").IsDone) {
+                    var temp = $sli[j];
+                    $sli[j] = $sli[j + 1];
+                    $sli[j + 1] = temp;   //此处值对集合中的更换下标，并未对dom进行操作所以页面中并没有变化
+
+                    console.log($sli[j])
+                    console.log($sli[j+1])
+                   $($sli[j]).insertBefore($($sli[j+1]));//此处需将目标包装成jquery对象，才可 通过jquery方法来对元素进行操作，从而改变页面
+                }
+            }
+        }
+
+    })
+
+
+</script>
+
+
